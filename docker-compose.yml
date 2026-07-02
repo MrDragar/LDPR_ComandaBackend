@@ -1,0 +1,74 @@
+services:
+  backend:
+    command: uvicorn src.main:app --reload --port 8000 --host 0.0.0.0
+    build: ./backend
+    volumes:
+      - ./backend/src:/app/src
+      - ./logs:/app/logs
+      - ./db.sqlite3:/app/db.sqlite3
+    env_file:
+      - .env
+    environment:
+      BOT_TOKEN: ${TG_API_TOKEN}
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_FILE: ${LOG_FILE}
+      LOG_FORMAT: ${LOG_FORMAT}
+      SECRET_KEY: ${SECRET_KEY}
+    restart: always
+    ports:
+      - '8000:8000'
+    networks:
+      - app_network
+  tg_bot:
+    command: python3 -m src.main
+    build: ./tg_bot
+    volumes:
+      - ./tg_bot/src:/app/src
+      - ./logs:/app/logs
+      - ./tg_bot/docs:/app/docs
+      - ./db.sqlite3:/app/db.sqlite3
+    env_file:
+      - .env
+    environment:
+      TG_API_TOKEN: ${TG_API_TOKEN}
+      VK_API_TOKEN: ${VK_API_TOKEN}
+      ADMIN_IDS: ${ADMIN_IDS}
+      LOG_CHAT: ${LOG_CHAT}
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_FILE: ${LOG_FILE}
+      LOG_FORMAT: ${LOG_FORMAT}
+    restart: always
+  vk_bot:
+    command: python3 -m src.main
+    build: ./vk_bot
+    volumes:
+      - ./vk_bot/src:/app/src
+      - ./logs:/app/logs
+      - ./vk_bot/docs:/app/docs
+      - ./db.sqlite3:/app/db.sqlite3
+    env_file:
+      - .env
+    environment:
+      TG_API_TOKEN: ${TG_API_TOKEN}
+      VK_API_TOKEN: ${VK_API_TOKEN}
+      ADMIN_IDS: ${ADMIN_IDS}
+      LOG_CHAT: ${LOG_CHAT}
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_FILE: ${LOG_FILE}
+      LOG_FORMAT: ${LOG_FORMAT}
+    restart: always
+  proxy:
+    build: ./proxy
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+    restart: unless-stopped
+
+
+networks:
+  app_network:
+    driver: bridge
+    external: true
