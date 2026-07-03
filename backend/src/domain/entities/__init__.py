@@ -7,20 +7,11 @@ from .closed_event import ClosedEvent, EventRegistration
 from .active_user import ActiveUser
 from .participation import Participation
 from .headliner import Headliner, HeadlinerFollower
-
+from .petition import Petition, PetitionStatus, PetitionScope
 
 __all__ = [
-    'User',
-    'Sources',
-    'Referral',
-    'Repost',
-    'LearningTestAttempt',
-    'Product',
-    'Order',
-    'OrderStatus',
-    'ClosedEvent',
-    'EventRegistration',
-    'ActiveUser',
-    'Headliner',
-    'HeadlinerFollower',
+    'User', 'Sources', 'Referral', 'Repost', 'LearningTestAttempt',
+    'Product', 'Order', 'OrderStatus', 'ClosedEvent', 'EventRegistration',
+    'ActiveUser', 'Participation', 'Headliner', 'HeadlinerFollower',
+    'Petition', 'PetitionStatus', 'PetitionScope'
 ]

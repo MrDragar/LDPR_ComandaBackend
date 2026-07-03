@@ -34,3 +34,5 @@ S3_SECRET = os.getenv("S3_SECRET")
 S3_ENDPOINT = os.getenv("S3_ENDPOINT")
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///db.sqlite3")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "supersecretkey")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")

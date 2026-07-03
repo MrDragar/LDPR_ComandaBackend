@@ -5,8 +5,10 @@ from .headliner_service import HeadlinerService
 from .balance_service import BalanceService
 from .online_task_service import OnlineTaskService
 from .offline_task_service import OfflineTaskService
+from .auth_service import AuthService
+from .petition_service import PetitionService
 
 __all__ = [
     'UserService', 'ReferralService', 'BalanceService', 'HeadlinerService',
-    'OnlineTaskService', 'OfflineTaskService', 'interfaces'
+    'OnlineTaskService', 'OfflineTaskService', 'AuthService', 'PetitionService', 'interfaces'
 ]

@@ -13,7 +13,9 @@ from src.domain.interfaces import (IUnitOfWork, IUserRepository, IStringSorterRe
                                    IOrderRepository, IClosedEventRepository,
                                    IEventRegistrationRepository, IActiveUserRepository,
                                    IParticipationRepository, IHeadlinerRepository,
-                                   IVKPublicationRepository)
+                                   IVKPublicationRepository, IJWTRepository,
+                                   ITelegramAuthRepository, IVKAuthRepository, IMaxAuthRepository,
+                                   IPetitionRepository)
 from src.infrastructure import Database, UnitOfWork
 from src.infrastructure.interfaces import IDatabase
 from src.infrastructure.repositories import (UserRepository, FuzzywuzzyRepository,
@@ -23,15 +25,19 @@ from src.infrastructure.repositories import (UserRepository, FuzzywuzzyRepositor
                                              VKTaskVerificationRepository,
                                              EventRegistrationRepository, ClosedEventRepository,
                                              ActiveUserRepository, ParticipationRepository,
-                                             HeadlinerRepository, VKPublicationRepository)
+                                             HeadlinerRepository, VKPublicationRepository,
+                                             TelegramAuthRepository, JWTRepository,
+                                             VKAuthRepository, MaxAuthRepository,
+                                             PetitionRepository)
 from src.infrastructure.repositories.s3_storage import S3Storage
 from src.infrastructure.repositories.shop_repo import OrderRepository, ProductRepository
-from src.services import UserService, BalanceService, OnlineTaskService, OfflineTaskService
+from src.services import UserService, BalanceService, OnlineTaskService, OfflineTaskService, \
+    AuthService, PetitionService
 from src.services.active_user_service import ActiveUserService
 from src.services.closed_event_service import ClosedEventService
 from src.services.interfaces import IUserService, IOfflineTaskService, IOnlineTaskService, \
     IBalanceService, ILearningService, IProductService, IOrderService, IClosedEventService, \
-    IActiveUserService, IHeadlinerService
+    IActiveUserService, IHeadlinerService, IAuthService, IPetitionService
 from src.core import config
 from src.services.learning_service import LearningService
 from src.services.notification_service import NotificationService
@@ -96,6 +102,15 @@ class Container(DeclarativeContainer):
     active_user_repository: providers.Factory[IActiveUserRepository] = providers.Factory(
         ActiveUserRepository, uow=uow
     )
+    jwt_repository: providers.Factory[IJWTRepository] = providers.Factory(
+        JWTRepository, secret_key=config.JWT_SECRET_KEY, algorithm=config.JWT_ALGORITHM
+    )
+    tg_auth_repository: providers.Factory[ITelegramAuthRepository] = providers.Factory(
+        TelegramAuthRepository, token=config.TG_API_TOKEN
+    )
+    vk_auth_repository: providers.Factory[IVKAuthRepository] = providers.Factory(VKAuthRepository)
+    max_auth_repository: providers.Factory[IMaxAuthRepository] = providers.Factory(MaxAuthRepository)
+    petition_repository: providers.Factory[IPetitionRepository] = providers.Factory(PetitionRepository, uow=uow)
     notification_service = providers.Factory(
         NotificationService,
         vk_bot=bot,
@@ -175,4 +190,12 @@ class Container(DeclarativeContainer):
     )
     active_user_service: providers.Factory[IActiveUserService] = providers.Factory(
         ActiveUserService, uow=uow, repo=active_user_repository
+    )
+    auth_service: providers.Factory[IAuthService] = providers.Factory(
+        AuthService, user_repo=user_repository, jwt_repo=jwt_repository,
+        tg_auth_repo=tg_auth_repository, vk_auth_repo=vk_auth_repository,
+        max_auth_repo=max_auth_repository, uow=uow
+    )
+    petition_service: providers.Factory[IPetitionService] = providers.Factory(
+        PetitionService, petition_repo=petition_repository, user_repo=user_repository, uow=uow
     )

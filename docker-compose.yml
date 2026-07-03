@@ -5,70 +5,31 @@ services:
     volumes:
       - ./backend/src:/app/src
       - ./logs:/app/logs
-      - ./db.sqlite3:/app/db.sqlite3
     env_file:
       - .env
     environment:
-      BOT_TOKEN: ${TG_API_TOKEN}
+      TG_API_TOKEN: ${TG_API_TOKEN}
+      VK_API_TOKEN: ${VK_API_TOKEN}
+      MAX_API_TOKEN: ${MAX_API_TOKEN}
+      VK_BOT_LINK: ${VK_BOT_LINK}
+      TG_BOT_LINK: ${TG_BOT_LINK}
+      MAX_BOT_LINK: ${MAX_BOT_LINK}
+      VERIFY_CHAT_ID: ${VK_VERIFY_CHAT_ID}
+      ADMIN_IDS: ${ADMIN_IDS}
+      LOG_CHAT: ${LOG_CHAT}
       LOG_LEVEL: ${LOG_LEVEL}
       LOG_FILE: ${LOG_FILE}
       LOG_FORMAT: ${LOG_FORMAT}
-      SECRET_KEY: ${SECRET_KEY}
+      GROUP_ID: ${VK_GROUP_ID}
+      SERVICE_TOKEN: ${VK_SERVICE_TOKEN}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_REGION: ${S3_REGION}
+      S3_KEY: ${S3_KEY}
+      S3_SECRET: ${S3_SECRET}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      GROUP_LINK: ${GROUP_LINK}
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
     restart: always
     ports:
       - '8000:8000'
-    networks:
-      - app_network
-  tg_bot:
-    command: python3 -m src.main
-    build: ./tg_bot
-    volumes:
-      - ./tg_bot/src:/app/src
-      - ./logs:/app/logs
-      - ./tg_bot/docs:/app/docs
-      - ./db.sqlite3:/app/db.sqlite3
-    env_file:
-      - .env
-    environment:
-      TG_API_TOKEN: ${TG_API_TOKEN}
-      VK_API_TOKEN: ${VK_API_TOKEN}
-      ADMIN_IDS: ${ADMIN_IDS}
-      LOG_CHAT: ${LOG_CHAT}
-      LOG_LEVEL: ${LOG_LEVEL}
-      LOG_FILE: ${LOG_FILE}
-      LOG_FORMAT: ${LOG_FORMAT}
-    restart: always
-  vk_bot:
-    command: python3 -m src.main
-    build: ./vk_bot
-    volumes:
-      - ./vk_bot/src:/app/src
-      - ./logs:/app/logs
-      - ./vk_bot/docs:/app/docs
-      - ./db.sqlite3:/app/db.sqlite3
-    env_file:
-      - .env
-    environment:
-      TG_API_TOKEN: ${TG_API_TOKEN}
-      VK_API_TOKEN: ${VK_API_TOKEN}
-      ADMIN_IDS: ${ADMIN_IDS}
-      LOG_CHAT: ${LOG_CHAT}
-      LOG_LEVEL: ${LOG_LEVEL}
-      LOG_FILE: ${LOG_FILE}
-      LOG_FORMAT: ${LOG_FORMAT}
-    restart: always
-  proxy:
-    build: ./proxy
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-    networks:
-      - app_network
-    restart: unless-stopped
-
-
-networks:
-  app_network:
-    driver: bridge
-    external: true

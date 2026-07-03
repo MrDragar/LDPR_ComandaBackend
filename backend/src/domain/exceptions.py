@@ -48,3 +48,15 @@ class TaskNotCompletedError(DomainError):
 class VKApiError(DomainError):
     """Вызывается при ошибках обращения к VK API"""
     pass
+
+
+class AuthError(Exception):
+    pass
+
+
+class AuthBadUserError(AuthError):
+    pass
+
+
+class PetitionError(Exception):
+    pass

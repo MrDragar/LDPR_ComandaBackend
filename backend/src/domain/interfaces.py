@@ -3,7 +3,7 @@ from contextlib import _AsyncGeneratorContextManager
 from datetime import date
 
 from .entities import User, Sources, LearningTestAttempt, Product, Order, OrderStatus, ClosedEvent, \
-    EventRegistration
+    EventRegistration, Petition, PetitionStatus
 from .entities.headliner import Headliner, HeadlinerFollower
 from .entities.task import OnlineTask, OfflineTask, AcceptedOnlineTask, AcceptedOfflineTask, \
     Transaction, TaskStatus, TaskType
@@ -153,7 +153,9 @@ class IVKPublicationRepository(ABC):
 
 class IOnlineTaskRepository(ABC):
     @abstractmethod
-    async def get_active_tasks_for_user(self, user_id: int, user_source: Sources, today: date, skip: int, limit: int, is_member: bool | None = None) -> tuple[list[OnlineTask], int]: ...
+    async def get_active_tasks_for_user(self, user_id: int, user_source: Sources, today: date,
+                                        skip: int, limit: int, is_member: bool | None = None) -> \
+    tuple[list[OnlineTask], int]: ...
 
     @abstractmethod
     async def get_task_by_id(self, task_id: int) -> OnlineTask | None: ...
@@ -172,7 +174,9 @@ class IOnlineTaskRepository(ABC):
 
 class IOfflineTaskRepository(ABC):
     @abstractmethod
-    async def get_active_tasks_for_user(self, user_id: int, user_source: Sources, today: date, skip: int, limit: int, is_member: bool | None = None) -> tuple[list[OfflineTask], int]: ...
+    async def get_active_tasks_for_user(self, user_id: int, user_source: Sources, today: date,
+                                        skip: int, limit: int, is_member: bool | None = None) -> \
+    tuple[list[OfflineTask], int]: ...
 
     @abstractmethod
     async def get_task_by_id(self, task_id: int) -> OfflineTask | None: ...
@@ -223,12 +227,15 @@ class IAcceptedTaskRepository(ABC):
         ...
 
     @abstractmethod
-    async def update_online_task_status(self, user_id: int, user_source: Sources, task_id: int, status: TaskStatus) -> None:
+    async def update_online_task_status(self, user_id: int, user_source: Sources, task_id: int,
+                                        status: TaskStatus) -> None:
         ...
+
 
 class ITransactionRepository(ABC):
     @abstractmethod
     async def add_transaction(self, transaction: Transaction) -> Transaction: ...
+
     @abstractmethod
     async def get_user_rating(self, user_id: int, user_source: Sources) -> int: ...
 
@@ -354,3 +361,67 @@ class IParticipationRepository(ABC):
     @abstractmethod
     async def get_all_participation_ids(self, user_id: int, user_source: Sources) -> list[int]:
         ...
+
+
+class IJWTRepository(ABC):
+    @abstractmethod
+    async def create_access_token(self, user_id: int, source: str,
+                                  expires_delta: int | None = None) -> str: ...
+
+    @abstractmethod
+    async def decode_access_token(self, token: str) -> tuple[int, str]: ...
+
+
+class IVKAuthRepository(ABC):
+    @abstractmethod
+    async def verify_data(self, auth_data: str) -> int: ...
+
+
+class ITelegramAuthRepository(ABC):
+    @abstractmethod
+    async def verify_data(self, auth_data: str) -> int: ...
+
+
+class IMaxAuthRepository(ABC):
+    @abstractmethod
+    async def verify_data(self, auth_data: str) -> int: ...
+
+
+class IPetitionRepository(ABC):
+    @abstractmethod
+    async def create(self, petition: Petition) -> Petition: ...
+
+    @abstractmethod
+    async def get_by_id(self, petition_id: int) -> Petition | None: ...
+
+    @abstractmethod
+    async def get_feed(self, scope: str | None, region: str | None, limit: int) -> list[
+        Petition]: ...
+
+    @abstractmethod
+    async def get_all(self, scope: str | None, status: str | None, region: str | None, page: int,
+                      limit: int) -> tuple[list[Petition], int]: ...
+
+    @abstractmethod
+    async def get_my(self, user_id: int, source: str, page: int, limit: int) -> tuple[
+        list[Petition], int]: ...
+
+    @abstractmethod
+    async def get_supported(self, user_id: int, source: str, page: int, limit: int) -> tuple[
+        list[Petition], int]: ...
+
+    @abstractmethod
+    async def support(self, petition_id: int, user_id: int, source: str) -> bool: ...
+
+    @abstractmethod
+    async def is_supported(self, petition_id: int, user_id: int, source: str) -> bool: ...
+
+    @abstractmethod
+    async def increment_share(self, petition_id: int) -> None: ...
+
+    @abstractmethod
+    async def increment_view(self, petition_id: int) -> None: ...
+
+    @abstractmethod
+    async def update_status(self, petition_id: int, status: PetitionStatus) -> None: ...
+
