@@ -3,7 +3,7 @@ from contextlib import _AsyncGeneratorContextManager
 from datetime import date
 
 from .entities import User, Sources, LearningTestAttempt, Product, Order, OrderStatus, ClosedEvent, \
-    EventRegistration, Petition, PetitionStatus
+    EventRegistration, Petition, PetitionStatus, CandidateQuestion, Candidate
 from .entities.headliner import Headliner, HeadlinerFollower
 from .entities.task import OnlineTask, OfflineTask, AcceptedOnlineTask, AcceptedOfflineTask, \
     Transaction, TaskStatus, TaskType
@@ -425,3 +425,28 @@ class IPetitionRepository(ABC):
     @abstractmethod
     async def update_status(self, petition_id: int, status: PetitionStatus) -> None: ...
 
+
+
+class ICandidateRepository(ABC):
+    @abstractmethod
+    async def get_all(self, region: str | None, page: int, limit: int) -> tuple[list[Candidate], int]: ...
+    @abstractmethod
+    async def get_by_id(self, candidate_id: int) -> Candidate | None: ...
+    @abstractmethod
+    async def get_petitions_counts(self, candidate_id: int) -> tuple[int, int]: ...
+    @abstractmethod
+    async def get_petitions_by_status(self, candidate_id: int, status: str) -> list[dict]: ...
+
+
+class ICandidateQuestionRepository(ABC):
+    @abstractmethod
+    async def create(self, question: CandidateQuestion) -> CandidateQuestion: ...
+    @abstractmethod
+    async def get_by_id(self, question_id: int) -> CandidateQuestion | None: ...
+
+
+class IStatsRepository(ABC):
+    @abstractmethod
+    async def get_region_user_count(self, region: str) -> int: ...
+    @abstractmethod
+    async def get_user_weekly_stats(self, user_id: int, source: Sources) -> dict: ...

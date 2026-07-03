@@ -7,8 +7,12 @@ from .online_task_service import OnlineTaskService
 from .offline_task_service import OfflineTaskService
 from .auth_service import AuthService
 from .petition_service import PetitionService
+from .candidate_service import CandidateService
+from .admin_service import AdminPetitionService
+from .stats_service import StatsService
 
 __all__ = [
     'UserService', 'ReferralService', 'BalanceService', 'HeadlinerService',
-    'OnlineTaskService', 'OfflineTaskService', 'AuthService', 'PetitionService', 'interfaces'
+    'OnlineTaskService', 'OfflineTaskService', 'AuthService', 'PetitionService',
+    'CandidateService', 'AdminPetitionService', 'StatsService', 'interfaces'
 ]

@@ -60,3 +60,15 @@ class AuthBadUserError(AuthError):
 
 class PetitionError(Exception):
     pass
+
+
+class CandidateNotFoundError(Exception):
+    pass
+
+
+class QuestionNotFoundError(Exception):
+    pass
+
+
+class PetitionAlreadyModeratedError(Exception):
+    pass

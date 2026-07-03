@@ -7,6 +7,7 @@ from .closed_event import ClosedEventORM, EventRegistrationORM
 from .active_user import ActiveUserORM
 from .participation import ParticipationORM
 from .petition import PetitionORM, PetitionSupportORM
+from .candidate import CandidateORM, CandidateQuestionORM
 
 __all__ = [
     "UserORM", "ReferralORM", "HeadlinerORM", "HeadlinerFollowerORM",
@@ -14,5 +15,6 @@ __all__ = [
     "AcceptedOnlineTaskORM", "AcceptedOfflineTaskORM",
     "TransactionORM", "LearningTestAttemptORM",
     "ClosedEventORM", "EventRegistrationORM", "ActiveUserORM",
-    "ParticipationORM", "PetitionORM", "PetitionSupportORM"
+    "ParticipationORM", "PetitionORM", "PetitionSupportORM",
+    "CandidateORM", "CandidateQuestionORM"
 ]
