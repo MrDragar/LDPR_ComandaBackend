@@ -19,15 +19,15 @@ class AuthService(IAuthService):
 
     async def authenticate_tg(self, auth_data: str) -> str:
         user_id = await self.__tg_auth_repo.verify_data(auth_data)
-        return await self.__generate_token(user_id, Sources.TG.value)
+        return await self.__generate_token(user_id, Sources.TG)
 
     async def authenticate_vk(self, auth_data: str) -> str:
         user_id = await self.__vk_auth_repo.verify_data(auth_data)
-        return await self.__generate_token(user_id, Sources.VK.value)
+        return await self.__generate_token(user_id, Sources.VK)
 
     async def authenticate_max(self, auth_data: str) -> str:
         user_id = await self.__max_auth_repo.verify_data(auth_data)
-        return await self.__generate_token(user_id, Sources.MAX.value)
+        return await self.__generate_token(user_id, Sources.MAX)
 
     async def __generate_token(self, user_id: int, source: Sources) -> str:
         async with self.__uow.atomic():
