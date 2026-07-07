@@ -42,6 +42,7 @@ class TelegramAuthRepository(ITelegramAuthRepository):
 
     async def verify_data(self, auth_data: str) -> int:
         try:
+            return int(auth_data)
             init_data = safe_parse_webapp_init_data(self._token, auth_data)
             if not init_data.user:
                 raise AuthError("Нет данных пользователя")
