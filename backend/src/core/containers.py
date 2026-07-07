@@ -34,13 +34,15 @@ from src.infrastructure.repositories import (UserRepository, FuzzywuzzyRepositor
 from src.infrastructure.repositories.s3_storage import S3Storage
 from src.infrastructure.repositories.shop_repo import OrderRepository, ProductRepository
 from src.services import UserService, BalanceService, OnlineTaskService, OfflineTaskService, \
-    AuthService, PetitionService, CandidateService, AdminPetitionService, StatsService
+    AuthService, PetitionService, CandidateService, AdminPetitionService, StatsService, \
+    AdminCandidateService, CabinetPetitionService, CabinetQuestionService, UploadService
 from src.services.active_user_service import ActiveUserService
 from src.services.closed_event_service import ClosedEventService
 from src.services.interfaces import IUserService, IOfflineTaskService, IOnlineTaskService, \
     IBalanceService, ILearningService, IProductService, IOrderService, IClosedEventService, \
     IActiveUserService, IHeadlinerService, IAuthService, IPetitionService, IStatsService, \
-    IAdminPetitionService, ICandidateService
+    IAdminPetitionService, ICandidateService, IUploadService, ICabinetQuestionService, \
+    ICabinetPetitionService, IAdminCandidateService
 from src.core import config
 from src.services.learning_service import LearningService
 from src.services.notification_service import NotificationService
