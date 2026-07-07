@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
@@ -5,7 +6,15 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 
 from src.application.routes import root_router
+from src.core import config
 from src.core.containers import Container
+
+logging.basicConfig(
+    level=config.log_level,
+    format=config.log_format,
+    filename=config.log_file,
+    filemode="a"
+)
 
 
 @asynccontextmanager
