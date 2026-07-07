@@ -5,7 +5,6 @@ from src.domain.entities.petition import PetitionStatus, PetitionScope
 from src.domain.entities.user import Sources
 from src.infrastructure.database import Base
 
-
 class PetitionORM(Base):
     __tablename__ = "petitions"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -25,6 +24,7 @@ class PetitionORM(Base):
     candidate_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     candidate_progress: Mapped[str | None] = mapped_column(Text, nullable=True)
     candidate_result: Mapped[str | None] = mapped_column(Text, nullable=True)
+    candidate_result_image: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
 
 class PetitionSupportORM(Base):

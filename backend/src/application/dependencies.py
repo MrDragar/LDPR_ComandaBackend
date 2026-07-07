@@ -1,7 +1,9 @@
 from fastapi import Depends, Header, HTTPException, status
 from src.core.containers import Container
-from src.services.interfaces import (IAuthService, IUserService, IPetitionService, 
-                                     ICandidateService, IAdminPetitionService, IStatsService)
+from src.services.interfaces import (IAuthService, IUserService, IPetitionService,
+                                     ICandidateService, IAdminPetitionService, IStatsService,
+                                     IUploadService, ICabinetQuestionService,
+                                     ICabinetPetitionService, IAdminCandidateService)
 from src.domain.entities.user import User, UserRole
 from src.domain.exceptions import AuthError, AuthBadUserError
 
