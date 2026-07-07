@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, UTC
 from enum import Enum
 
-
 class PetitionStatus(str, Enum):
     MODERATION = "moderation"
     PUBLISHED = "published"
@@ -10,11 +9,9 @@ class PetitionStatus(str, Enum):
     COMPLETED = "completed"
     REJECTED = "rejected"
 
-
 class PetitionScope(str, Enum):
     REGION = "region"
     FEDERAL = "federal"
-
 
 @dataclass
 class Petition:
@@ -35,4 +32,5 @@ class Petition:
     candidate_name: str | None = None
     candidate_progress: str | None = None
     candidate_result: str | None = None
+    candidate_result_image: str | None = None
     created_at: datetime = field(default_factory=lambda: datetime.now(UTC))

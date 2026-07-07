@@ -214,3 +214,15 @@ class Container(DeclarativeContainer):
     stats_service: providers.Factory[IStatsService] = providers.Factory(
         StatsService, stats_repo=stats_repository, uow=uow
     )
+    admin_candidate_service: providers.Factory[IAdminCandidateService] = providers.Factory(
+        AdminCandidateService, candidate_repo=candidate_repository, user_repo=user_repository, uow=uow
+    )
+    cabinet_petition_service: providers.Factory[ICabinetPetitionService] = providers.Factory(
+        CabinetPetitionService, candidate_repo=candidate_repository, petition_repo=petition_repository, uow=uow
+    )
+    cabinet_question_service: providers.Factory[ICabinetQuestionService] = providers.Factory(
+        CabinetQuestionService, candidate_repo=candidate_repository, question_repo=candidate_question_repository, uow=uow
+    )
+    upload_service: providers.Factory[IUploadService] = providers.Factory(
+        UploadService, s3_storage=s3_storage
+    )

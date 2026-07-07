@@ -1,5 +1,5 @@
 import logging
-from sqlalchemy import select, func
+from sqlalchemy import select, func, update
 from src.domain.entities.candidate import Candidate, CandidateQuestion
 from src.domain.entities.petition import PetitionStatus
 from src.domain.entities.user import Sources
@@ -14,7 +14,25 @@ logger = logging.getLogger(__name__)
 class CandidateRepository(ICandidateRepository):
     def __init__(self, uow: IDatabaseUnitOfWork):
         self.__uow = uow
+    
+    async def create(self, candidate: Candidate) -> Candidate:
+        session = self.__uow.get_session()
+        orm = CandidateORM(
+            user_id=candidate.user_id, source=candidate.source, fio=candidate.fio,
+            region=candidate.region, photo_url=candidate.photo_url, bio=candidate.bio,
+            topics=candidate.topics, social_links=candidate.social_links
+        )
+        session.add(orm)
+        await session.flush()
+        candidate.id = orm.id
+        return candidate
 
+    async def get_by_user_id(self, user_id: int, source: Sources) -> Candidate | None:
+        session = self.__uow.get_session()
+        stmt = select(CandidateORM).where(CandidateORM.user_id == user_id, CandidateORM.source == source)
+        orm = await session.scalar(stmt)
+        return self._to_domain(orm) if orm else None
+    
     async def get_all(self, region: str | None, page: int, limit: int) -> tuple[
         list[Candidate], int]:
         session = self.__uow.get_session()
@@ -90,6 +108,39 @@ class CandidateQuestionRepository(ICandidateQuestionRepository):
         stmt = select(CandidateQuestionORM).where(CandidateQuestionORM.id == question_id)
         orm = await session.scalar(stmt)
         if not orm: return None
+        return CandidateQuestion(
+            id=orm.id, candidate_id=orm.candidate_id, author_id=orm.author_id,
+            author_source=orm.author_source, text=orm.text, is_anonymous=orm.is_anonymous,
+            answer_text=orm.answer_text, answer_voice_url=orm.answer_voice_url,
+            answer_video_url=orm.answer_video_url, status=orm.status, created_at=orm.created_at
+        )
+
+    async def get_for_candidate(self, candidate_id: int, status: str | None, page: int,
+                                limit: int) -> tuple[list[CandidateQuestion], int]:
+        session = self.__uow.get_session()
+        stmt = select(CandidateQuestionORM).where(CandidateQuestionORM.candidate_id == candidate_id)
+        if status:
+            stmt = stmt.where(CandidateQuestionORM.status == status)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = await session.scalar(count_stmt) or 0
+        stmt = stmt.order_by(CandidateQuestionORM.created_at.desc()).offset(
+            (page - 1) * limit).limit(limit)
+        result = await session.execute(stmt)
+        return [self._to_domain(o) for o in result.scalars().all()], total
+
+    async def update_answer(self, question_id: int, text: str | None, voice_url: str | None,
+                            video_url: str | None) -> None:
+        session = self.__uow.get_session()
+        await session.execute(
+            update(CandidateQuestionORM).where(CandidateQuestionORM.id == question_id).values(
+                answer_text=text, answer_voice_url=voice_url, answer_video_url=video_url,
+                status="answered"
+            )
+        )
+        await session.flush()
+
+    def _to_domain(self, orm: CandidateQuestionORM) -> CandidateQuestion:
         return CandidateQuestion(
             id=orm.id, candidate_id=orm.candidate_id, author_id=orm.author_id,
             author_source=orm.author_source, text=orm.text, is_anonymous=orm.is_anonymous,

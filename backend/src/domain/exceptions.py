@@ -72,3 +72,19 @@ class QuestionNotFoundError(Exception):
 
 class PetitionAlreadyModeratedError(Exception):
     pass
+
+
+class CandidateAlreadyExistsError(Exception):
+    pass
+
+
+class PetitionAlreadyTakenError(Exception):
+    pass
+
+
+class PetitionNotAvailableError(Exception):
+    pass
+
+
+class CandidateNotAssignedError(Exception):
+    pass

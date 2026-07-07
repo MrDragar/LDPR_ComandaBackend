@@ -28,6 +28,18 @@ async def get_admin_petition_service(container: Container = Depends(get_containe
 async def get_stats_service(container: Container = Depends(get_container)) -> IStatsService:
     return container.stats_service()
 
+async def get_admin_candidate_service(container: Container = Depends(get_container)) -> IAdminCandidateService:
+    return container.admin_candidate_service()
+
+async def get_cabinet_petition_service(container: Container = Depends(get_container)) -> ICabinetPetitionService:
+    return container.cabinet_petition_service()
+
+async def get_cabinet_question_service(container: Container = Depends(get_container)) -> ICabinetQuestionService:
+    return container.cabinet_question_service()
+
+async def get_upload_service(container: Container = Depends(get_container)) -> IUploadService:
+    return container.upload_service()
+
 async def get_current_user(authorization: str = Header(...), auth_service: IAuthService = Depends(get_auth_service)) -> User:
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid auth scheme")

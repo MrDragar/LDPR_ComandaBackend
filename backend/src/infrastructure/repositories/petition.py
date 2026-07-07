@@ -137,6 +137,66 @@ class PetitionRepository(IPetitionRepository):
         )
         await session.flush()
 
+    async def get_available_for_candidate(self, region: str, page: int, limit: int) -> tuple[list[Petition], int]:
+        session = self.__uow.get_session()
+        stmt = select(PetitionORM).where(
+            PetitionORM.status == PetitionStatus.PUBLISHED,
+            PetitionORM.scope == PetitionScope.REGION,
+            PetitionORM.region == region,
+            PetitionORM.candidate_id.is_(None)
+        )
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = await session.scalar(count_stmt) or 0
+        stmt = stmt.order_by(PetitionORM.created_at.desc()).offset((page - 1) * limit).limit(limit)
+        result = await session.execute(stmt)
+        return [self._to_domain(o) for o in result.scalars().all()], total
+
+    async def get_by_candidate(self, candidate_id: int, status: str, page: int, limit: int) -> tuple[list[Petition], int]:
+        session = self.__uow.get_session()
+        stmt = select(PetitionORM).where(PetitionORM.candidate_id == candidate_id)
+        if status:
+            stmt = stmt.where(PetitionORM.status == status)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = await session.scalar(count_stmt) or 0
+        stmt = stmt.order_by(PetitionORM.created_at.desc()).offset((page - 1) * limit).limit(limit)
+        result = await session.execute(stmt)
+        return [self._to_domain(o) for o in result.scalars().all()], total
+
+    async def take_petition(self, petition_id: int, candidate_id: int, candidate_name: str, initial_comment: str) -> None:
+        session = self.__uow.get_session()
+        await session.execute(
+            update(PetitionORM).where(
+                PetitionORM.id == petition_id,
+                PetitionORM.candidate_id.is_(None),
+                PetitionORM.status == PetitionStatus.PUBLISHED
+            ).values(
+                candidate_id=candidate_id,
+                candidate_name=candidate_name,
+                status=PetitionStatus.IN_PROGRESS,
+                candidate_progress=initial_comment
+            )
+        )
+        await session.flush()
+
+    async def update_progress(self, petition_id: int, comment: str) -> None:
+        session = self.__uow.get_session()
+        await session.execute(
+            update(PetitionORM).where(PetitionORM.id == petition_id).values(candidate_progress=comment)
+        )
+        await session.flush()
+
+    async def complete_petition(self, petition_id: int, result: str, result_image_url: str | None) -> None:
+        session = self.__uow.get_session()
+        await session.execute(
+            update(PetitionORM).where(PetitionORM.id == petition_id).values(
+                status=PetitionStatus.COMPLETED,
+                candidate_result=result,
+                candidate_result_image=result_image_url
+            )
+        )
+        await session.flush()
+
     def _to_domain(self, orm: PetitionORM) -> Petition:
         return Petition(
             id=orm.id, title=orm.title, description=orm.description, region=orm.region,
@@ -145,5 +205,6 @@ class PetitionRepository(IPetitionRepository):
             support_count=orm.support_count, share_count=orm.share_count,
             view_count=orm.view_count, status=orm.status, candidate_id=orm.candidate_id,
             candidate_name=orm.candidate_name, candidate_progress=orm.candidate_progress,
-            candidate_result=orm.candidate_result, created_at=orm.created_at
+            candidate_result=orm.candidate_result, candidate_result_image=orm.candidate_result_image,
+            created_at=orm.created_at
         )

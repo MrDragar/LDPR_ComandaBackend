@@ -10,9 +10,14 @@ from .petition_service import PetitionService
 from .candidate_service import CandidateService
 from .admin_service import AdminPetitionService
 from .stats_service import StatsService
+from .admin_candidate_service import AdminCandidateService
+from .cabinet_petition_service import CabinetPetitionService
+from .cabinet_question_service import CabinetQuestionService
+from .upload_service import UploadService
 
 __all__ = [
     'UserService', 'ReferralService', 'BalanceService', 'HeadlinerService',
     'OnlineTaskService', 'OfflineTaskService', 'AuthService', 'PetitionService',
-    'CandidateService', 'AdminPetitionService', 'StatsService', 'interfaces'
+    'CandidateService', 'AdminPetitionService', 'StatsService', 'AdminCandidateService',
+    'CabinetPetitionService', 'CabinetQuestionService', 'UploadService', 'interfaces'
 ]
