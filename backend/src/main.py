@@ -13,7 +13,8 @@ logging.basicConfig(
     level=config.log_level,
     format=config.log_format,
     filename=config.log_file,
-    filemode="a"
+    filemode="a",
+    force=True
 )
 
 

@@ -61,27 +61,6 @@ async def get_feed(scope: Optional[str] = None, region: Optional[str] = None, li
     return await petition_service.get_feed(user.id, user.source, scope, region, limit)
 
 
-@router.post("", status_code=201)
-async def create_petition(data: CreatePetitionRequest, user: User = Depends(get_current_user),
-                          petition_service: IPetitionService = Depends(get_petition_service)):
-    if data.scope == "federal" and user.role != UserRole.STAFF_CA:
-        raise HTTPException(status_code=403, detail={"error": "FORBIDDEN_ROLE", "message": "Only STAFF_CA can create federal petitions"})
-    try:
-        petition = await petition_service.create_petition(user.id, user.source, data.title, data.description, data.image_url, data.scope)
-        return {"id": petition.id, "status": petition.status, "message": "Петиция отправлена на модерацию"}
-    except PetitionError as e:
-        raise HTTPException(status_code=400, detail={"error": "INVALID_PAYLOAD", "message": str(e)})
-
-
-@router.get("/{petition_id}", response_model=PetitionResponse)
-async def get_petition(petition_id: int, user: User = Depends(get_current_user),
-                       petition_service: IPetitionService = Depends(get_petition_service)):
-    try:
-        return await petition_service.get_petition(petition_id, user.id, user.source)
-    except PetitionError as e:
-        raise HTTPException(status_code=404, detail={"error": "PETITION_NOT_FOUND", "message": str(e)})
-
-
 @router.post("/{petition_id}/support", response_model=SupportResponse)
 async def support_petition(petition_id: int, user: User = Depends(get_current_user),
                            petition_service: IPetitionService = Depends(get_petition_service)):
@@ -123,3 +102,24 @@ async def get_my_petitions(page: int = 1, limit: int = 20, user: User = Depends(
 async def get_supported_petitions(page: int = 1, limit: int = 20, user: User = Depends(get_current_user),
                                   petition_service: IPetitionService = Depends(get_petition_service)):
     return await petition_service.get_supported(user.id, user.source, page, limit)
+
+
+@router.post("", status_code=201)
+async def create_petition(data: CreatePetitionRequest, user: User = Depends(get_current_user),
+                          petition_service: IPetitionService = Depends(get_petition_service)):
+    if data.scope == "federal" and user.role != UserRole.STAFF_CA:
+        raise HTTPException(status_code=403, detail={"error": "FORBIDDEN_ROLE", "message": "Only STAFF_CA can create federal petitions"})
+    try:
+        petition = await petition_service.create_petition(user.id, user.source, data.title, data.description, data.image_url, data.scope)
+        return {"id": petition.id, "status": petition.status, "message": "Петиция отправлена на модерацию"}
+    except PetitionError as e:
+        raise HTTPException(status_code=400, detail={"error": "INVALID_PAYLOAD", "message": str(e)})
+
+
+@router.get("/{petition_id}", response_model=PetitionResponse)
+async def get_petition(petition_id: int, user: User = Depends(get_current_user),
+                       petition_service: IPetitionService = Depends(get_petition_service)):
+    try:
+        return await petition_service.get_petition(petition_id, user.id, user.source)
+    except PetitionError as e:
+        raise HTTPException(status_code=404, detail={"error": "PETITION_NOT_FOUND", "message": str(e)})
