@@ -15,25 +15,24 @@ class AdminCandidateService(IAdminCandidateService):
         self.__user_repo = user_repo
         self.__uow = uow
 
-    async def create_candidate(self, user_id: int, source: str, fio: str, region: str,
+    async def create_candidate(self, user_id: int, source: Sources, fio: str, region: str,
                                photo_url: str | None,
                                bio: str | None, topics: list[str],
                                social_links: dict[str, str]) -> dict:
         async with self.__uow.atomic():
-            src = Sources(source)
-            user = await self.__user_repo.get_user(user_id, src)
+            user = await self.__user_repo.get_user(user_id, source)
 
-            existing = await self.__candidate_repo.get_by_user_id(user_id, src)
+            existing = await self.__candidate_repo.get_by_user_id(user_id, source)
             if existing:
                 raise CandidateAlreadyExistsError("Пользователь уже является кандидатом")
 
             candidate = Candidate(
-                id=0, user_id=user_id, source=src, fio=fio, region=region,
+                id=0, user_id=user_id, source=source, fio=fio, region=region,
                 photo_url=photo_url, bio=bio, topics=topics, social_links=social_links
             )
             created = await self.__candidate_repo.create(candidate)
 
             # Назначаем роль CANDIDATE пользователю
-            await self.__user_repo.update_user_role(user_id, src, UserRole.CANDIDATE)
+            await self.__user_repo.update_user_role(user_id, source, UserRole.CANDIDATE)
 
             return {"candidate_id": created.id, "message": "Кандидат успешно добавлен"}

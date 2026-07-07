@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from src.application.dependencies import get_admin_petition_service, require_role, \
     get_admin_candidate_service
-from src.domain.entities.user import User, UserRole
+from src.domain.entities.user import User, UserRole, Sources
 from src.services.interfaces import IAdminPetitionService, IAdminCandidateService
 from src.domain.exceptions import PetitionError, PetitionAlreadyModeratedError, UserNotFoundError, \
     CandidateAlreadyExistsError
@@ -49,7 +49,7 @@ async def reject_petition(petition_id: int, data: RejectRequest,
 
 class CreateCandidateRequest(BaseModel):
     user_id: int
-    source: str
+    source: Sources
     fio: str
     region: str
     photo_url: Optional[str] = None

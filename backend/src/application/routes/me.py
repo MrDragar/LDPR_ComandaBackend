@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from src.application.dependencies import get_current_user, get_auth_service
-from src.domain.entities.user import User
+from src.domain.entities.user import User, Sources
 from src.services.interfaces import IAuthService
 
 router = APIRouter()
@@ -10,7 +10,7 @@ router = APIRouter()
 
 class MeResponse(BaseModel):
     id: int
-    source: str
+    source: Sources
     username: Optional[str]
     surname: str
     name: Optional[str]
