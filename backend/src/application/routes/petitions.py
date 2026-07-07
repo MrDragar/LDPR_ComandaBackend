@@ -58,7 +58,7 @@ class PaginatedPetitions(BaseModel):
 async def get_feed(scope: Optional[str] = None, region: Optional[str] = None, limit: int = 20,
                    user: User = Depends(get_current_user),
                    petition_service: IPetitionService = Depends(get_petition_service)):
-    return await petition_service.get_feed(scope, region, limit)
+    return await petition_service.get_feed(user.id, user.source.value, scope, region, limit)
 
 
 @router.post("", status_code=201)
@@ -97,8 +97,7 @@ async def support_petition(petition_id: int, user: User = Depends(get_current_us
 @router.post("/{petition_id}/skip")
 async def skip_petition(petition_id: int, user: User = Depends(get_current_user),
                         petition_service: IPetitionService = Depends(get_petition_service)):
-    await petition_service.skip_petition(petition_id, user.id, user.source.value)
-    return {"skipped": True}
+    return await petition_service.skip_petition(petition_id, user.id, user.source.value)
 
 
 @router.post("/{petition_id}/share", response_model=ShareResponse)

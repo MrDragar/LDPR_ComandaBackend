@@ -37,3 +37,14 @@ class PetitionSupportORM(Base):
     __table_args__ = (
         Index('idx_petition_support_unique', 'petition_id', 'user_id', 'user_source', unique=True),
     )
+
+class PetitionSkipORM(Base):
+    __tablename__ = "petition_skips"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    petition_id: Mapped[int] = mapped_column(nullable=False)
+    user_id: Mapped[int] = mapped_column(BigInteger(), nullable=False)
+    user_source: Mapped[Sources] = mapped_column(SQLEnum(Sources), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(UTC))
+    __table_args__ = (
+        Index('idx_petition_skip_unique', 'petition_id', 'user_id', 'user_source', unique=True),
+    )

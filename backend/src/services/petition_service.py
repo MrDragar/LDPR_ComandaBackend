@@ -45,9 +45,9 @@ class PetitionService(IPetitionService):
 
             return self._to_dict(petition, is_supported)
 
-    async def get_feed(self, scope: str | None, region: str | None, limit: int) -> list[dict]:
+    async def get_feed(self, user_id: int, source: str, scope: str | None, region: str | None, limit: int) -> list[dict]:
         async with self.__uow.atomic():
-            petitions = await self.__petition_repo.get_feed(scope, region, limit)
+            petitions = await self.__petition_repo.get_feed(scope, region, limit, user_id, source)
             return [self._to_dict(p) for p in petitions]
 
     async def get_all(self, scope: str | None, status: str | None, region: str | None, page: int,
@@ -91,8 +91,10 @@ class PetitionService(IPetitionService):
 
             return petition.support_count + 1
 
-    async def skip_petition(self, petition_id: int, user_id: int, source: str) -> None:
-        pass
+    async def skip_petition(self, petition_id: int, user_id: int, source: str) -> dict:
+        async with self.__uow.atomic():
+            await self.__petition_repo.skip_petition(petition_id, user_id, source)
+        return {"skipped": True}
 
     async def share_petition(self, petition_id: int) -> dict:
         async with self.__uow.atomic():

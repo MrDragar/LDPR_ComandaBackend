@@ -4,7 +4,7 @@ from src.domain.entities.petition import Petition, PetitionStatus, PetitionScope
 from src.domain.entities.user import Sources
 from src.domain.interfaces import IPetitionRepository
 from src.infrastructure.interfaces import IDatabaseUnitOfWork
-from src.infrastructure.models.petition import PetitionORM, PetitionSupportORM
+from src.infrastructure.models.petition import PetitionORM, PetitionSupportORM, PetitionSkipORM
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +33,18 @@ class PetitionRepository(IPetitionRepository):
         if not orm: return None
         return self._to_domain(orm)
 
-    async def get_feed(self, scope: str | None, region: str | None, limit: int) -> list[Petition]:
+    async def get_feed(self, scope: str | None, region: str | None, limit: int,
+                       user_id: int | None = None, source: str | None = None) -> list[Petition]:
         session = self.__uow.get_session()
         stmt = select(PetitionORM).where(PetitionORM.status == PetitionStatus.PUBLISHED)
         if scope: stmt = stmt.where(PetitionORM.scope == scope)
         if region: stmt = stmt.where(PetitionORM.region == region)
+
+        if user_id and source:
+            skipped_ids = await self.get_skipped_ids(user_id, source)
+            if skipped_ids:
+                stmt = stmt.where(PetitionORM.id.notin_(skipped_ids))
+
         stmt = stmt.order_by(PetitionORM.created_at.desc()).limit(limit)
         result = await session.execute(stmt)
         return [self._to_domain(o) for o in result.scalars().all()]
@@ -208,3 +215,25 @@ class PetitionRepository(IPetitionRepository):
             candidate_result=orm.candidate_result, candidate_result_image=orm.candidate_result_image,
             created_at=orm.created_at
         )
+
+    async def skip_petition(self, petition_id: int, user_id: int, source: str) -> None:
+        session = self.__uow.get_session()
+        stmt = select(PetitionSkipORM).where(
+            PetitionSkipORM.petition_id == petition_id,
+            PetitionSkipORM.user_id == user_id,
+            PetitionSkipORM.user_source == source
+        )
+        existing = await session.scalar(stmt)
+        if not existing:
+            skip_orm = PetitionSkipORM(petition_id=petition_id, user_id=user_id, user_source=source)
+            session.add(skip_orm)
+            await session.flush()
+
+    async def get_skipped_ids(self, user_id: int, source: str) -> list[int]:
+        session = self.__uow.get_session()
+        stmt = select(PetitionSkipORM.petition_id).where(
+            PetitionSkipORM.user_id == user_id,
+            PetitionSkipORM.user_source == source
+        )
+        result = await session.execute(stmt)
+        return [row[0] for row in result.all()]
