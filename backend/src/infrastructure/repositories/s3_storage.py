@@ -31,7 +31,10 @@ class S3Storage(IS3Storage):
             )
             return client.generate_presigned_url(
                 'put_object',
-                Params={'Bucket': self.bucket, 'Key': object_key, 'ContentType': content_type},
+                Params={
+                    'Bucket': self.bucket, 'Key': object_key, 'ContentType': content_type,
+                    'ACL': 'public-read'
+                },
                 ExpiresIn=expires_in
             )
         return await asyncio.to_thread(_sync_generate)
