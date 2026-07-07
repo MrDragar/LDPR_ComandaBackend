@@ -1,5 +1,5 @@
 import logging
-from src.domain.entities.petition import PetitionStatus
+from src.domain.entities import PetitionStatus, Sources
 from src.domain.exceptions import PetitionNotAvailableError, PetitionAlreadyTakenError, \
     CandidateNotAssignedError
 from src.domain.interfaces import ICandidateRepository, IPetitionRepository, IUnitOfWork
@@ -15,14 +15,14 @@ class CabinetPetitionService(ICabinetPetitionService):
         self.__petition_repo = petition_repo
         self.__uow = uow
 
-    async def __get_candidate(self, user_id: int, source: str):
+    async def __get_candidate(self, user_id: int, source: Sources):
         from src.domain.entities.user import Sources
-        candidate = await self.__candidate_repo.get_by_user_id(user_id, Sources(source))
+        candidate = await self.__candidate_repo.get_by_user_id(user_id, source)
         if not candidate:
             raise CandidateNotAssignedError("Вы не являетесь кандидатом")
         return candidate
 
-    async def get_petitions(self, user_id: int, source: str, status: str, page: int,
+    async def get_petitions(self, user_id: int, source: Sources, status: str, page: int,
                             limit: int) -> dict:
         async with self.__uow.atomic():
             candidate = await self.__get_candidate(user_id, source)
@@ -42,7 +42,7 @@ class CabinetPetitionService(ICabinetPetitionService):
                 "page": page, "limit": limit, "total": total
             }
 
-    async def take_petition(self, user_id: int, source: str, petition_id: int,
+    async def take_petition(self, user_id: int, source: Sources, petition_id: int,
                             initial_comment: str) -> dict:
         async with self.__uow.atomic():
             candidate = await self.__get_candidate(user_id, source)
@@ -57,7 +57,7 @@ class CabinetPetitionService(ICabinetPetitionService):
                                                      initial_comment)
             return {"status": "in_progress", "message": "Петиция взята в работу"}
 
-    async def update_progress(self, user_id: int, source: str, petition_id: int,
+    async def update_progress(self, user_id: int, source: Sources, petition_id: int,
                               comment: str) -> dict:
         async with self.__uow.atomic():
             candidate = await self.__get_candidate(user_id, source)
@@ -68,7 +68,7 @@ class CabinetPetitionService(ICabinetPetitionService):
             await self.__petition_repo.update_progress(petition_id, comment)
             return {"updated": True, "current_progress": comment}
 
-    async def complete_petition(self, user_id: int, source: str, petition_id: int, result: str,
+    async def complete_petition(self, user_id: int, source: Sources, petition_id: int, result: str,
                                 result_image_url: str | None) -> dict:
         async with self.__uow.atomic():
             candidate = await self.__get_candidate(user_id, source)

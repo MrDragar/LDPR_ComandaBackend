@@ -2,6 +2,9 @@ from dataclasses import dataclass, field
 from datetime import datetime, UTC
 from enum import Enum
 
+from src.domain.entities import Sources
+
+
 class PetitionStatus(str, Enum):
     MODERATION = "moderation"
     PUBLISHED = "published"
@@ -22,7 +25,7 @@ class Petition:
     scope: PetitionScope
     image_url: str | None
     author_id: int
-    author_source: str
+    author_source: Sources
     author_name: str
     support_count: int = 0
     share_count: int = 0

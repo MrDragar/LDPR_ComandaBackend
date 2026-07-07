@@ -34,7 +34,7 @@ class PetitionRepository(IPetitionRepository):
         return self._to_domain(orm)
 
     async def get_feed(self, scope: str | None, region: str | None, limit: int,
-                       user_id: int | None = None, source: str | None = None) -> list[Petition]:
+                       user_id: int | None = None, source: Sources | None = None) -> list[Petition]:
         session = self.__uow.get_session()
         stmt = select(PetitionORM).where(PetitionORM.status == PetitionStatus.PUBLISHED)
         if scope: stmt = stmt.where(PetitionORM.scope == scope)
@@ -64,7 +64,7 @@ class PetitionRepository(IPetitionRepository):
         result = await session.execute(stmt)
         return [self._to_domain(o) for o in result.scalars().all()], total
 
-    async def get_my(self, user_id: int, source: str, page: int, limit: int) -> tuple[
+    async def get_my(self, user_id: int, source: Sources, page: int, limit: int) -> tuple[
         list[Petition], int]:
         session = self.__uow.get_session()
         stmt = select(PetitionORM).where(PetitionORM.author_id == user_id,
@@ -75,7 +75,7 @@ class PetitionRepository(IPetitionRepository):
         result = await session.execute(stmt)
         return [self._to_domain(o) for o in result.scalars().all()], total
 
-    async def get_supported(self, user_id: int, source: str, page: int, limit: int) -> tuple[
+    async def get_supported(self, user_id: int, source: Sources, page: int, limit: int) -> tuple[
         list[Petition], int]:
         session = self.__uow.get_session()
         stmt = select(PetitionORM).join(
@@ -91,7 +91,7 @@ class PetitionRepository(IPetitionRepository):
         result = await session.execute(stmt)
         return [self._to_domain(o) for o in result.scalars().all()], total
 
-    async def support(self, petition_id: int, user_id: int, source: str) -> bool:
+    async def support(self, petition_id: int, user_id: int, source: Sources) -> bool:
         session = self.__uow.get_session()
         stmt = select(PetitionSupportORM).where(
             PetitionSupportORM.petition_id == petition_id,
@@ -112,7 +112,7 @@ class PetitionRepository(IPetitionRepository):
         await session.flush()
         return True
 
-    async def is_supported(self, petition_id: int, user_id: int, source: str) -> bool:
+    async def is_supported(self, petition_id: int, user_id: int, source: Sources) -> bool:
         session = self.__uow.get_session()
         stmt = select(func.count()).select_from(PetitionSupportORM).where(
             PetitionSupportORM.petition_id == petition_id,
@@ -216,7 +216,7 @@ class PetitionRepository(IPetitionRepository):
             created_at=orm.created_at
         )
 
-    async def skip_petition(self, petition_id: int, user_id: int, source: str) -> None:
+    async def skip_petition(self, petition_id: int, user_id: int, source: Sources) -> None:
         session = self.__uow.get_session()
         stmt = select(PetitionSkipORM).where(
             PetitionSkipORM.petition_id == petition_id,
@@ -229,7 +229,7 @@ class PetitionRepository(IPetitionRepository):
             session.add(skip_orm)
             await session.flush()
 
-    async def get_skipped_ids(self, user_id: int, source: str) -> list[int]:
+    async def get_skipped_ids(self, user_id: int, source: Sources) -> list[int]:
         session = self.__uow.get_session()
         stmt = select(PetitionSkipORM.petition_id).where(
             PetitionSkipORM.user_id == user_id,

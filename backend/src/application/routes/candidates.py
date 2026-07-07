@@ -70,6 +70,6 @@ async def ask_question(candidate_id: int, data: QuestionRequest, user: User = De
     if not data.text.strip():
         raise HTTPException(status_code=400, detail={"error": "INVALID_PAYLOAD", "message": "Текст вопроса не может быть пустым"})
     try:
-        return await candidate_service.ask_question(candidate_id, user.id, user.source.value, data.text, data.is_anonymous)
+        return await candidate_service.ask_question(candidate_id, user.id, user.source, data.text, data.is_anonymous)
     except CandidateNotFoundError:
         raise HTTPException(status_code=404, detail={"error": "CANDIDATE_NOT_FOUND", "message": "Кандидат не найден"})

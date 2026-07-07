@@ -57,7 +57,7 @@ async def patch_me(data: PatchMeRequest, user: User = Depends(get_current_user),
         raise HTTPException(status_code=400,
                             detail={"error": "INVALID_PAYLOAD", "message": "No fields to update"})
 
-    updated_user = await auth_service.update_user_profile(user.id, user.source.value, **updates)
+    updated_user = await auth_service.update_user_profile(user.id, user.source, **updates)
     return MeResponse(
         id=updated_user.id, source=updated_user.source.value, username=updated_user.username,
         surname=updated_user.surname,

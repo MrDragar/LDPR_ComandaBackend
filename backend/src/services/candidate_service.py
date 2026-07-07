@@ -46,7 +46,8 @@ class CandidateService(ICandidateService):
                 "petitions_in_progress": in_prog_pets, "petitions_completed": completed_pets
             }
 
-    async def ask_question(self, candidate_id: int, author_id: int, author_source: str, text: str,
+    async def ask_question(self, candidate_id: int, author_id: int, author_source: Sources,
+                           text: str,
                            is_anonymous: bool) -> dict:
         async with self.__uow.atomic():
             c = await self.__candidate_repo.get_by_id(candidate_id)
@@ -55,7 +56,7 @@ class CandidateService(ICandidateService):
 
             question = CandidateQuestion(
                 id=0, candidate_id=candidate_id, author_id=author_id,
-                author_source=Sources(author_source), text=text, is_anonymous=is_anonymous
+                author_source=author_source, text=text, is_anonymous=is_anonymous
             )
             saved_q = await self.__question_repo.create(question)
             return {"question_id": saved_q.id, "status": saved_q.status}

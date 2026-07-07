@@ -29,10 +29,10 @@ class AuthService(IAuthService):
         user_id = await self.__max_auth_repo.verify_data(auth_data)
         return await self.__generate_token(user_id, Sources.MAX.value)
 
-    async def __generate_token(self, user_id: int, source: str) -> str:
+    async def __generate_token(self, user_id: int, source: Sources) -> str:
         async with self.__uow.atomic():
             try:
-                user = await self.__user_repo.get_user(user_id, Sources(source))
+                user = await self.__user_repo.get_user(user_id, source)
             except UserNotFoundError:
                 raise AuthBadUserError("Пользователь не найден. Пройдите регистрацию в боте.")
             except Exception as e:
@@ -43,7 +43,7 @@ class AuthService(IAuthService):
     async def get_user_by_token(self, token: str) -> User:
         try:
             user_id, source_str = await self.__jwt_repo.decode_access_token(token)
-            source = Sources(source_str)
+            source = source_str
             async with self.__uow.atomic():
                 user = await self.__user_repo.get_user(user_id, source)
             return user
@@ -55,7 +55,7 @@ class AuthService(IAuthService):
             logger.error(f"Token decode error: {e}")
             raise AuthError("Некорректный токен")
 
-    async def update_user_profile(self, user_id: int, source: str, **kwargs) -> User:
+    async def update_user_profile(self, user_id: int, source: Sources, **kwargs) -> User:
         async with self.__uow.atomic():
-            return await self.__user_repo.update_user_profile(user_id, Sources(source), **kwargs)
+            return await self.__user_repo.update_user_profile(user_id, source, **kwargs)
         

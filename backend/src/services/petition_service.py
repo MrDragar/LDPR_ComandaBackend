@@ -15,10 +15,10 @@ class PetitionService(IPetitionService):
         self.__user_repo = user_repo
         self.__uow = uow
 
-    async def create_petition(self, user_id: int, source: str, title: str, description: str,
+    async def create_petition(self, user_id: int, source: Sources, title: str, description: str,
                               image_url: str | None, scope: str) -> Petition:
         async with self.__uow.atomic():
-            user = await self.__user_repo.get_user(user_id, Sources(source))
+            user = await self.__user_repo.get_user(user_id, source)
             if scope == PetitionScope.FEDERAL.value and user.role != UserRole.STAFF_CA:
                 raise PetitionError("Только сотрудник ЦА может создавать федеральные петиции")
 
@@ -31,7 +31,7 @@ class PetitionService(IPetitionService):
             )
             return await self.__petition_repo.create(petition)
 
-    async def get_petition(self, petition_id: int, user_id: int | None, source: str | None) -> dict:
+    async def get_petition(self, petition_id: int, user_id: int | None, source: Sources | None) -> dict:
         async with self.__uow.atomic():
             petition = await self.__petition_repo.get_by_id(petition_id)
             if not petition:
@@ -45,7 +45,7 @@ class PetitionService(IPetitionService):
 
             return self._to_dict(petition, is_supported)
 
-    async def get_feed(self, user_id: int, source: str, scope: str | None, region: str | None, limit: int) -> list[dict]:
+    async def get_feed(self, user_id: int, source: Sources, scope: str | None, region: str | None, limit: int) -> list[dict]:
         async with self.__uow.atomic():
             petitions = await self.__petition_repo.get_feed(scope, region, limit, user_id, source)
             return [self._to_dict(p) for p in petitions]
@@ -60,7 +60,7 @@ class PetitionService(IPetitionService):
                 "page": page, "limit": limit, "total": total
             }
 
-    async def get_my(self, user_id: int, source: str, page: int, limit: int) -> dict:
+    async def get_my(self, user_id: int, source: Sources, page: int, limit: int) -> dict:
         async with self.__uow.atomic():
             petitions, total = await self.__petition_repo.get_my(user_id, source, page, limit)
             return {
@@ -68,7 +68,7 @@ class PetitionService(IPetitionService):
                 "page": page, "limit": limit, "total": total
             }
 
-    async def get_supported(self, user_id: int, source: str, page: int, limit: int) -> dict:
+    async def get_supported(self, user_id: int, source: Sources, page: int, limit: int) -> dict:
         async with self.__uow.atomic():
             petitions, total = await self.__petition_repo.get_supported(user_id, source, page,
                                                                         limit)
@@ -77,7 +77,7 @@ class PetitionService(IPetitionService):
                 "page": page, "limit": limit, "total": total
             }
 
-    async def support_petition(self, petition_id: int, user_id: int, source: str) -> int:
+    async def support_petition(self, petition_id: int, user_id: int, source: Sources) -> int:
         async with self.__uow.atomic():
             petition = await self.__petition_repo.get_by_id(petition_id)
             if not petition:
@@ -91,7 +91,7 @@ class PetitionService(IPetitionService):
 
             return petition.support_count + 1
 
-    async def skip_petition(self, petition_id: int, user_id: int, source: str) -> dict:
+    async def skip_petition(self, petition_id: int, user_id: int, source: Sources) -> dict:
         async with self.__uow.atomic():
             await self.__petition_repo.skip_petition(petition_id, user_id, source)
         return {"skipped": True}

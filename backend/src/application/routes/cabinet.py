@@ -44,7 +44,7 @@ async def get_cabinet_petitions(status: str = "available", page: int = 1, limit:
                                 user: User = Depends(require_role([UserRole.CANDIDATE, UserRole.STAFF_CA])),
                                 service: ICabinetPetitionService = Depends(get_cabinet_petition_service)):
     try:
-        return await service.get_petitions(user.id, user.source.value, status, page, limit)
+        return await service.get_petitions(user.id, user.source, status, page, limit)
     except CandidateNotAssignedError as e:
         raise HTTPException(status_code=403, detail={"error": "FORBIDDEN_ROLE", "message": str(e)})
 
@@ -54,7 +54,7 @@ async def take_petition(petition_id: int, data: TakePetitionRequest,
                         user: User = Depends(require_role([UserRole.CANDIDATE, UserRole.STAFF_CA])),
                         service: ICabinetPetitionService = Depends(get_cabinet_petition_service)):
     try:
-        return await service.take_petition(user.id, user.source.value, petition_id, data.initial_comment)
+        return await service.take_petition(user.id, user.source, petition_id, data.initial_comment)
     except CandidateNotAssignedError as e:
         raise HTTPException(status_code=403, detail={"error": "FORBIDDEN_ROLE", "message": str(e)})
     except PetitionNotAvailableError as e:
@@ -66,7 +66,7 @@ async def update_progress(petition_id: int, data: ProgressRequest,
                           user: User = Depends(require_role([UserRole.CANDIDATE, UserRole.STAFF_CA])),
                           service: ICabinetPetitionService = Depends(get_cabinet_petition_service)):
     try:
-        return await service.update_progress(user.id, user.source.value, petition_id, data.comment)
+        return await service.update_progress(user.id, user.source, petition_id, data.comment)
     except CandidateNotAssignedError as e:
         raise HTTPException(status_code=403, detail={"error": "FORBIDDEN_ROLE", "message": str(e)})
 
@@ -76,7 +76,7 @@ async def complete_petition(petition_id: int, data: CompleteRequest,
                             user: User = Depends(require_role([UserRole.CANDIDATE, UserRole.STAFF_CA])),
                             service: ICabinetPetitionService = Depends(get_cabinet_petition_service)):
     try:
-        return await service.complete_petition(user.id, user.source.value, petition_id, data.result, data.result_image_url)
+        return await service.complete_petition(user.id, user.source, petition_id, data.result, data.result_image_url)
     except CandidateNotAssignedError as e:
         raise HTTPException(status_code=403, detail={"error": "FORBIDDEN_ROLE", "message": str(e)})
 
@@ -109,7 +109,7 @@ async def get_cabinet_questions(status: Optional[str] = None, page: int = 1, lim
                                 user: User = Depends(require_role([UserRole.CANDIDATE, UserRole.STAFF_CA])),
                                 service: ICabinetQuestionService = Depends(get_cabinet_question_service)):
     try:
-        return await service.get_questions(user.id, user.source.value, status, page, limit)
+        return await service.get_questions(user.id, user.source, status, page, limit)
     except CandidateNotAssignedError as e:
         raise HTTPException(status_code=403, detail={"error": "FORBIDDEN_ROLE", "message": str(e)})
 
@@ -119,7 +119,7 @@ async def answer_question(question_id: int, data: AnswerRequest,
                           user: User = Depends(require_role([UserRole.CANDIDATE, UserRole.STAFF_CA])),
                           service: ICabinetQuestionService = Depends(get_cabinet_question_service)):
     try:
-        return await service.answer_question(user.id, user.source.value, question_id, data.text, data.voice_url, data.video_url)
+        return await service.answer_question(user.id, user.source, question_id, data.text, data.voice_url, data.video_url)
     except QuestionNotFoundError as e:
         raise HTTPException(status_code=404, detail={"error": "QUESTION_NOT_FOUND", "message": str(e)})
     except CandidateNotAssignedError as e:

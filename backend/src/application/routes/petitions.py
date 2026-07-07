@@ -58,7 +58,7 @@ class PaginatedPetitions(BaseModel):
 async def get_feed(scope: Optional[str] = None, region: Optional[str] = None, limit: int = 20,
                    user: User = Depends(get_current_user),
                    petition_service: IPetitionService = Depends(get_petition_service)):
-    return await petition_service.get_feed(user.id, user.source.value, scope, region, limit)
+    return await petition_service.get_feed(user.id, user.source, scope, region, limit)
 
 
 @router.post("", status_code=201)
@@ -67,8 +67,8 @@ async def create_petition(data: CreatePetitionRequest, user: User = Depends(get_
     if data.scope == "federal" and user.role != UserRole.STAFF_CA:
         raise HTTPException(status_code=403, detail={"error": "FORBIDDEN_ROLE", "message": "Only STAFF_CA can create federal petitions"})
     try:
-        petition = await petition_service.create_petition(user.id, user.source.value, data.title, data.description, data.image_url, data.scope)
-        return {"id": petition.id, "status": petition.status.value, "message": "Петиция отправлена на модерацию"}
+        petition = await petition_service.create_petition(user.id, user.source, data.title, data.description, data.image_url, data.scope)
+        return {"id": petition.id, "status": petition.status, "message": "Петиция отправлена на модерацию"}
     except PetitionError as e:
         raise HTTPException(status_code=400, detail={"error": "INVALID_PAYLOAD", "message": str(e)})
 
@@ -77,7 +77,7 @@ async def create_petition(data: CreatePetitionRequest, user: User = Depends(get_
 async def get_petition(petition_id: int, user: User = Depends(get_current_user),
                        petition_service: IPetitionService = Depends(get_petition_service)):
     try:
-        return await petition_service.get_petition(petition_id, user.id, user.source.value)
+        return await petition_service.get_petition(petition_id, user.id, user.source)
     except PetitionError as e:
         raise HTTPException(status_code=404, detail={"error": "PETITION_NOT_FOUND", "message": str(e)})
 
@@ -86,7 +86,7 @@ async def get_petition(petition_id: int, user: User = Depends(get_current_user),
 async def support_petition(petition_id: int, user: User = Depends(get_current_user),
                            petition_service: IPetitionService = Depends(get_petition_service)):
     try:
-        count = await petition_service.support_petition(petition_id, user.id, user.source.value)
+        count = await petition_service.support_petition(petition_id, user.id, user.source)
         return {"support_count": count, "reward": 2}
     except PetitionError as e:
         if "уже поддержали" in str(e):
@@ -97,7 +97,7 @@ async def support_petition(petition_id: int, user: User = Depends(get_current_us
 @router.post("/{petition_id}/skip")
 async def skip_petition(petition_id: int, user: User = Depends(get_current_user),
                         petition_service: IPetitionService = Depends(get_petition_service)):
-    return await petition_service.skip_petition(petition_id, user.id, user.source.value)
+    return await petition_service.skip_petition(petition_id, user.id, user.source)
 
 
 @router.post("/{petition_id}/share", response_model=ShareResponse)
@@ -116,10 +116,10 @@ async def get_petitions(scope: Optional[str] = None, status: Optional[str] = Non
 @router.get("/my", response_model=PaginatedPetitions)
 async def get_my_petitions(page: int = 1, limit: int = 20, user: User = Depends(get_current_user),
                            petition_service: IPetitionService = Depends(get_petition_service)):
-    return await petition_service.get_my(user.id, user.source.value, page, limit)
+    return await petition_service.get_my(user.id, user.source, page, limit)
 
 
 @router.get("/supported", response_model=PaginatedPetitions)
 async def get_supported_petitions(page: int = 1, limit: int = 20, user: User = Depends(get_current_user),
                                   petition_service: IPetitionService = Depends(get_petition_service)):
-    return await petition_service.get_supported(user.id, user.source.value, page, limit)
+    return await petition_service.get_supported(user.id, user.source, page, limit)
