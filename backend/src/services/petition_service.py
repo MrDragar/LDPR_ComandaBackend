@@ -114,5 +114,6 @@ class PetitionService(IPetitionService):
             "view_count": p.view_count, "status": p.status.value,
             "candidate_id": p.candidate_id, "candidate_name": p.candidate_name,
             "candidate_progress": p.candidate_progress, "candidate_result": p.candidate_result,
-            "is_supported_by_me": is_supported, "created_at": p.created_at.isoformat()
+            "is_supported_by_me": is_supported, "created_at": p.created_at.isoformat(),
+            "candidate_result_image": p.candidate_result_image
         }
