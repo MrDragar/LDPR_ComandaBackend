@@ -16,7 +16,7 @@ from src.domain.interfaces import (IUnitOfWork, IUserRepository, IStringSorterRe
                                    IVKPublicationRepository, IJWTRepository,
                                    ITelegramAuthRepository, IVKAuthRepository, IMaxAuthRepository,
                                    IPetitionRepository, ICandidateRepository,
-                                   ICandidateQuestionRepository, IStatsRepository)
+                                   ICandidateQuestionRepository, IStatsRepository, IHillRepository)
 from src.infrastructure import Database, UnitOfWork
 from src.infrastructure.interfaces import IDatabase
 from src.infrastructure.repositories import (UserRepository, FuzzywuzzyRepository,
@@ -30,19 +30,21 @@ from src.infrastructure.repositories import (UserRepository, FuzzywuzzyRepositor
                                              TelegramAuthRepository, JWTRepository,
                                              VKAuthRepository, MaxAuthRepository,
                                              PetitionRepository, StatsRepository,
-                                             CandidateRepository, CandidateQuestionRepository)
+                                             CandidateRepository, CandidateQuestionRepository,
+                                             HillRepository)
 from src.infrastructure.repositories.s3_storage import S3Storage
 from src.infrastructure.repositories.shop_repo import OrderRepository, ProductRepository
 from src.services import UserService, BalanceService, OnlineTaskService, OfflineTaskService, \
     AuthService, PetitionService, CandidateService, AdminPetitionService, StatsService, \
-    AdminCandidateService, CabinetPetitionService, CabinetQuestionService, UploadService
+    AdminCandidateService, CabinetPetitionService, CabinetQuestionService, UploadService, \
+    HillService
 from src.services.active_user_service import ActiveUserService
 from src.services.closed_event_service import ClosedEventService
 from src.services.interfaces import IUserService, IOfflineTaskService, IOnlineTaskService, \
     IBalanceService, ILearningService, IProductService, IOrderService, IClosedEventService, \
     IActiveUserService, IHeadlinerService, IAuthService, IPetitionService, IStatsService, \
     IAdminPetitionService, ICandidateService, IUploadService, ICabinetQuestionService, \
-    ICabinetPetitionService, IAdminCandidateService
+    ICabinetPetitionService, IAdminCandidateService, IHillService
 from src.core import config
 from src.services.learning_service import LearningService
 from src.services.notification_service import NotificationService
@@ -119,6 +121,7 @@ class Container(DeclarativeContainer):
     candidate_repository: providers.Factory[ICandidateRepository] = providers.Factory(CandidateRepository, uow=uow)
     candidate_question_repository: providers.Factory[ICandidateQuestionRepository] = providers.Factory(CandidateQuestionRepository, uow=uow)
     stats_repository: providers.Factory[IStatsRepository] = providers.Factory(StatsRepository, uow=uow)
+    hill_repository: providers.Factory[IHillRepository] = providers.Factory(HillRepository, uow=uow)
     notification_service = providers.Factory(
         NotificationService,
         vk_bot=bot,
@@ -227,4 +230,7 @@ class Container(DeclarativeContainer):
     )
     upload_service: providers.Factory[IUploadService] = providers.Factory(
         UploadService, s3_storage=s3_storage
+    )
+    hill_service: providers.Factory[IHillService] = providers.Factory(
+        HillService, hill_repo=hill_repository, uow=uow
     )

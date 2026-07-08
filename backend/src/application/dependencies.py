@@ -3,7 +3,7 @@ from src.core.containers import Container
 from src.services.interfaces import (IAuthService, IUserService, IPetitionService,
                                      ICandidateService, IAdminPetitionService, IStatsService,
                                      IUploadService, ICabinetQuestionService,
-                                     ICabinetPetitionService, IAdminCandidateService)
+                                     ICabinetPetitionService, IAdminCandidateService, IHillService)
 from src.domain.entities.user import User, UserRole
 from src.domain.exceptions import AuthError, AuthBadUserError
 
@@ -41,6 +41,9 @@ async def get_cabinet_question_service(container: Container = Depends(get_contai
 
 async def get_upload_service(container: Container = Depends(get_container)) -> IUploadService:
     return container.upload_service()
+async def get_hill_service(container: Container = Depends(get_container)) -> IHillService:
+    return container.hill_service()
+
 
 async def get_current_user(authorization: str = Header(...), auth_service: IAuthService = Depends(get_auth_service)) -> User:
     if not authorization.startswith("Bearer "):

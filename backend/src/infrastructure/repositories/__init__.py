@@ -15,6 +15,8 @@ from .auth import JWTRepository, TelegramAuthRepository, VKAuthRepository, MaxAu
 from .petition import PetitionRepository
 from .candidate import CandidateRepository, CandidateQuestionRepository
 from .stats import StatsRepository
+from .hill import HillRepository
+
 
 __all__ = [
     'UserRepository', 'LevenshteinRepository', 'FuzzywuzzyRepository', 'ReferralRepository',
@@ -24,5 +26,5 @@ __all__ = [
     'ClosedEventRepository', 'EventRegistrationRepository', 'ActiveUserRepository',
     'ParticipationRepository', 'JWTRepository', 'TelegramAuthRepository', 'VKAuthRepository',
     'MaxAuthRepository', 'PetitionRepository', 'CandidateRepository', 'CandidateQuestionRepository',
-    'StatsRepository'
+    'StatsRepository', 'HillRepository'
 ]

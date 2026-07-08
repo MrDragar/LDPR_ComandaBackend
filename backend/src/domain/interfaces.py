@@ -3,7 +3,7 @@ from contextlib import _AsyncGeneratorContextManager
 from datetime import date
 
 from .entities import User, Sources, LearningTestAttempt, Product, Order, OrderStatus, ClosedEvent, \
-    EventRegistration, Petition, PetitionStatus, CandidateQuestion, Candidate
+    EventRegistration, Petition, PetitionStatus, CandidateQuestion, Candidate, HillVote
 from .entities.headliner import Headliner, HeadlinerFollower
 from .entities.task import OnlineTask, OfflineTask, AcceptedOnlineTask, AcceptedOfflineTask, \
     Transaction, TaskStatus, TaskType
@@ -472,3 +472,15 @@ class IStatsRepository(ABC):
     async def get_region_user_count(self, region: str) -> int: ...
     @abstractmethod
     async def get_user_weekly_stats(self, user_id: int, source: Sources) -> dict: ...
+
+
+class IHillRepository(ABC):
+    @abstractmethod
+    async def get_pair_for_user(self, user_id: int, source: Sources) -> tuple[
+                                                                            Petition, Petition] | None: ...
+
+    @abstractmethod
+    async def save_vote(self, vote: HillVote) -> HillVote: ...
+
+    @abstractmethod
+    async def get_user_votes_count(self, user_id: int, source: Sources) -> int: ...

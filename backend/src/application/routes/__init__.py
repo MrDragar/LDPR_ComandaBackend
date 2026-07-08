@@ -8,6 +8,7 @@ from .referral import router as referral_router
 from .stats import router as stats_router
 from .cabinet import router as cabinet_router
 from .upload import router as upload_router
+from .hill import router as hill_router
 
 
 root_router = APIRouter()
@@ -20,3 +21,4 @@ root_router.include_router(stats_router, prefix="/stats", tags=["Stats"])
 root_router.include_router(referral_router, prefix="/referral", tags=["Referral"])
 root_router.include_router(upload_router, prefix="/upload", tags=["Upload"])
 root_router.include_router(cabinet_router, prefix="/cabinet", tags=["Cabinet"])
+root_router.include_router(hill_router, prefix="/hill", tags=["Hill"])

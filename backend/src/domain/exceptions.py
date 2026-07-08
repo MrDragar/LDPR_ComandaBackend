@@ -92,3 +92,7 @@ class CandidateNotAssignedError(Exception):
 
 class UserAlreadyExistsError(Exception):
     pass
+
+
+class HillError(Exception):
+    pass

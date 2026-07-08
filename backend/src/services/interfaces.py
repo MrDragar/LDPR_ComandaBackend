@@ -391,3 +391,13 @@ class ICabinetQuestionService(ABC):
 class IUploadService(ABC):
     @abstractmethod
     async def get_presigned_url(self, filename: str, content_type: str) -> dict: ...
+
+
+class IHillService(ABC):
+    @abstractmethod
+    async def get_battle(self, user_id: int, source: Sources) -> dict: ...
+    @abstractmethod
+    async def make_choice(self, user_id: int, source: Sources, left_id: int, right_id: int,
+                          winner_id: int) -> dict: ...
+    @abstractmethod
+    async def get_stats(self, user_id: int, source: Sources) -> dict: ...
