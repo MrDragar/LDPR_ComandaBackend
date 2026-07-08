@@ -26,6 +26,7 @@ class PetitionResponse(BaseModel):
     candidate_name: Optional[str]
     candidate_progress: Optional[str]
     candidate_result: Optional[str]
+    candidate_result_image: Optional[str]
     is_supported_by_me: bool
     created_at: str
 
