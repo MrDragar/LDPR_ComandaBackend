@@ -75,8 +75,7 @@ class IUserService(ABC):
     async def get_local_top(self, region: str, limit: int = 10) -> list[dict]: ...
     @abstractmethod
     async def get_users_by_role(self, role: UserRole) -> list[User]: ...
-    @abstractmethod
-    async def register(self, auth_data: str, source: str, user_data: dict) -> str: ...
+
 
 class IBalanceService(ABC):
     @abstractmethod
