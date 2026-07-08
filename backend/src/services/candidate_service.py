@@ -60,3 +60,20 @@ class CandidateService(ICandidateService):
             )
             saved_q = await self.__question_repo.create(question)
             return {"question_id": saved_q.id, "status": saved_q.status}
+
+    async def get_my_questions(self, user_id: int, source: Sources, page: int, limit: int) -> dict:
+        async with self.__uow.atomic():
+            questions, total = await self.__question_repo.get_by_author(user_id, source, page, limit)
+            return {
+                "items": [{
+                    "id": q.id,
+                    "candidate_id": q.candidate_id,
+                    "text": q.text,
+                    "status": q.status,
+                    "created_at": q.created_at.isoformat(),
+                    "answer_text": q.answer_text,
+                    "answer_voice_url": q.answer_voice_url,
+                    "answer_video_url": q.answer_video_url
+                } for q in questions],
+                "page": page, "limit": limit, "total": total
+            }

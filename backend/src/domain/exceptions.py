@@ -88,3 +88,7 @@ class PetitionNotAvailableError(Exception):
 
 class CandidateNotAssignedError(Exception):
     pass
+
+
+class UserAlreadyExistsError(Exception):
+    pass

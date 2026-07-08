@@ -31,7 +31,10 @@ class CabinetQuestionService(ICabinetQuestionService):
                 "items": [{
                     "id": q.id, "text": q.text, "is_anonymous": q.is_anonymous,
                     "author_name": "Аноним" if q.is_anonymous else f"User #{q.author_id}",
-                    "status": q.status, "created_at": q.created_at.isoformat()
+                    "status": q.status, "created_at": q.created_at.isoformat(),
+                    "answer_text": q.answer_text,
+                    "answer_voice_url": q.answer_voice_url,
+                    "answer_video_url": q.answer_video_url
                 } for q in questions],
                 "page": page, "limit": limit, "total": total
             }

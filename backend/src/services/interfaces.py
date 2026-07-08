@@ -75,7 +75,8 @@ class IUserService(ABC):
     async def get_local_top(self, region: str, limit: int = 10) -> list[dict]: ...
     @abstractmethod
     async def get_users_by_role(self, role: UserRole) -> list[User]: ...
-
+    @abstractmethod
+    async def register(self, auth_data: str, source: str, user_data: dict) -> str: ...
 
 class IBalanceService(ABC):
     @abstractmethod
@@ -308,6 +309,8 @@ class IAuthService(ABC):
     async def get_user_by_token(self, token: str) -> User: ...
     @abstractmethod
     async def update_user_profile(self, user_id: int, source: Sources, **kwargs) -> User: ...
+    @abstractmethod
+    async def register(self, auth_data: str, source: str, user_data: dict) -> str: ...
 
 
 class IPetitionService(ABC):
@@ -341,6 +344,9 @@ class ICandidateService(ABC):
     @abstractmethod
     async def ask_question(self, candidate_id: int, author_id: int, author_source: Sources,
                            text: str, is_anonymous: bool) -> dict: ...
+    @abstractmethod
+    async def get_my_questions(self, user_id: int, source: Sources, page: int,
+                               limit: int) -> dict: ...
 
 
 class IAdminPetitionService(ABC):

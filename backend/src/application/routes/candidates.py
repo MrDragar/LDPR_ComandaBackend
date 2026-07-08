@@ -48,6 +48,31 @@ class QuestionResponse(BaseModel):
     status: str
 
 
+class MyQuestionItem(BaseModel):
+    id: int
+    candidate_id: int
+    text: str
+    status: str
+    created_at: str
+    answer_text: Optional[str] = None
+    answer_voice_url: Optional[str] = None
+    answer_video_url: Optional[str] = None
+
+
+class PaginatedMyQuestions(BaseModel):
+    items: List[MyQuestionItem]
+    page: int
+    limit: int
+    total: int
+
+
+@router.get("/questions/my", response_model=PaginatedMyQuestions)
+async def get_my_questions(page: int = 1, limit: int = 20,
+                           user: User = Depends(get_current_user),
+                           candidate_service: ICandidateService = Depends(get_candidate_service)):
+    return await candidate_service.get_my_questions(user.id, user.source, page, limit)
+
+
 @router.get("", response_model=PaginatedCandidates)
 async def get_candidates(region: Optional[str] = None, page: int = 1, limit: int = 20,
                          user: User = Depends(get_current_user),

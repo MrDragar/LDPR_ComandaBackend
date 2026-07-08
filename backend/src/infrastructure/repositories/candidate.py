@@ -140,6 +140,18 @@ class CandidateQuestionRepository(ICandidateQuestionRepository):
         )
         await session.flush()
 
+    async def get_by_author(self, user_id: int, source: Sources, page: int, limit: int) -> tuple[list[CandidateQuestion], int]:
+        session = self.__uow.get_session()
+        stmt = select(CandidateQuestionORM).where(
+            CandidateQuestionORM.author_id == user_id,
+            CandidateQuestionORM.author_source == source
+        )
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = await session.scalar(count_stmt) or 0
+        stmt = stmt.order_by(CandidateQuestionORM.created_at.desc()).offset((page - 1) * limit).limit(limit)
+        result = await session.execute(stmt)
+        return [self._to_domain(o) for o in result.scalars().all()], total
+
     def _to_domain(self, orm: CandidateQuestionORM) -> CandidateQuestion:
         return CandidateQuestion(
             id=orm.id, candidate_id=orm.candidate_id, author_id=orm.author_id,
