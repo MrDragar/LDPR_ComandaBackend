@@ -115,8 +115,12 @@ class Container(DeclarativeContainer):
     tg_auth_repository: providers.Factory[ITelegramAuthRepository] = providers.Factory(
         TelegramAuthRepository, token=config.TG_API_TOKEN
     )
-    vk_auth_repository: providers.Factory[IVKAuthRepository] = providers.Factory(VKAuthRepository)
-    max_auth_repository: providers.Factory[IMaxAuthRepository] = providers.Factory(MaxAuthRepository)
+    vk_auth_repository: providers.Factory[IVKAuthRepository] = providers.Factory(
+        VKAuthRepository, client_secret=config.VK_MINIAPP_SECRET
+    )
+    max_auth_repository: providers.Factory[IMaxAuthRepository] = providers.Factory(
+        MaxAuthRepository, token=config.MAX_API_TOKEN
+    )
     petition_repository: providers.Factory[IPetitionRepository] = providers.Factory(PetitionRepository, uow=uow)
     candidate_repository: providers.Factory[ICandidateRepository] = providers.Factory(CandidateRepository, uow=uow)
     candidate_question_repository: providers.Factory[ICandidateQuestionRepository] = providers.Factory(CandidateQuestionRepository, uow=uow)

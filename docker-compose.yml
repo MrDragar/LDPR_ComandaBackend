@@ -30,6 +30,7 @@ services:
       GROUP_LINK: ${GROUP_LINK}
       DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      VK_MINIAPP_SECRET: ${VK_MINIAPP_SECRET}
     restart: always
     ports:
       - '8000:8000'
