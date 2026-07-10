@@ -3,17 +3,18 @@ from src.domain.entities import PetitionStatus, Sources
 from src.domain.exceptions import PetitionNotAvailableError, PetitionAlreadyTakenError, \
     CandidateNotAssignedError
 from src.domain.interfaces import ICandidateRepository, IPetitionRepository, IUnitOfWork
-from src.services.interfaces import ICabinetPetitionService
+from src.services.interfaces import ICabinetPetitionService, INotificationService
 
 logger = logging.getLogger(__name__)
 
 
 class CabinetPetitionService(ICabinetPetitionService):
     def __init__(self, candidate_repo: ICandidateRepository, petition_repo: IPetitionRepository,
-                 uow: IUnitOfWork):
+                 uow: IUnitOfWork, notification_service: INotificationService):
         self.__candidate_repo = candidate_repo
         self.__petition_repo = petition_repo
         self.__uow = uow
+        self.__notification_service = notification_service
 
     async def __get_candidate(self, user_id: int, source: Sources):
         from src.domain.entities.user import Sources
@@ -55,6 +56,10 @@ class CabinetPetitionService(ICabinetPetitionService):
 
             await self.__petition_repo.take_petition(petition_id, candidate.id, candidate.fio,
                                                      initial_comment)
+            await self.__notification_service.notify_user(
+                petition.author_id, petition.author_source, 
+                f"Кандидат {candidate.fio} взял вашу петицию «{petition.title}» в работу"
+            )
             return {"status": "in_progress", "message": "Петиция взята в работу"}
 
     async def update_progress(self, user_id: int, source: Sources, petition_id: int,
@@ -66,6 +71,10 @@ class CabinetPetitionService(ICabinetPetitionService):
                 raise CandidateNotAssignedError("Петиция не закреплена за вами")
 
             await self.__petition_repo.update_progress(petition_id, comment)
+            await self.__notification_service.notify_user(
+                petition.author_id, petition.author_source,
+                f"Обновление по работе с петицией «{petition.title}»: {comment}"
+            )
             return {"updated": True, "current_progress": comment}
 
     async def complete_petition(self, user_id: int, source: Sources, petition_id: int, result: str,
@@ -77,6 +86,10 @@ class CabinetPetitionService(ICabinetPetitionService):
                 raise CandidateNotAssignedError("Петиция не закреплена за вами")
 
             await self.__petition_repo.complete_petition(petition_id, result, result_image_url)
+            await self.__notification_service.notify_user(
+                petition.author_id, petition.author_source,
+                f"Работа с петицией «{petition.title}» завершена.\n\nРезультат:\n{result}"
+            )
             return {"status": "completed", "message": "Петиция завершена"}
 
     def _to_dict(self, p) -> dict:

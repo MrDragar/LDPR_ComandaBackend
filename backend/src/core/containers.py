@@ -218,7 +218,8 @@ class Container(DeclarativeContainer):
         CandidateService, candidate_repo=candidate_repository, question_repo=candidate_question_repository, uow=uow
     )
     admin_petition_service: providers.Factory[IAdminPetitionService] = providers.Factory(
-        AdminPetitionService, petition_repo=petition_repository, uow=uow
+        AdminPetitionService, petition_repo=petition_repository, uow=uow,
+        notification_service=notification_service
     )
     stats_service: providers.Factory[IStatsService] = providers.Factory(
         StatsService, stats_repo=stats_repository, uow=uow
@@ -227,7 +228,8 @@ class Container(DeclarativeContainer):
         AdminCandidateService, candidate_repo=candidate_repository, user_repo=user_repository, uow=uow
     )
     cabinet_petition_service: providers.Factory[ICabinetPetitionService] = providers.Factory(
-        CabinetPetitionService, candidate_repo=candidate_repository, petition_repo=petition_repository, uow=uow
+        CabinetPetitionService, candidate_repo=candidate_repository,
+        petition_repo=petition_repository, uow=uow, notification_service=notification_service
     )
     cabinet_question_service: providers.Factory[ICabinetQuestionService] = providers.Factory(
         CabinetQuestionService, candidate_repo=candidate_repository, question_repo=candidate_question_repository, uow=uow

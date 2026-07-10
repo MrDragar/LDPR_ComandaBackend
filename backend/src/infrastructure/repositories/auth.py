@@ -59,7 +59,7 @@ class TelegramAuthRepository(ITelegramAuthRepository):
             raise AuthError(f"Ошибка авторизации Telegram: {e}")
 
 
-class MAXAuthRepository(IMaxAuthRepository):
+class MaxAuthRepository(IMaxAuthRepository):
     def __init__(self, bot_token: str):
         self._bot_token = bot_token
 
