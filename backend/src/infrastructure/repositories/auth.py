@@ -60,8 +60,8 @@ class TelegramAuthRepository(ITelegramAuthRepository):
 
 
 class MaxAuthRepository(IMaxAuthRepository):
-    def __init__(self, bot_token: str):
-        self._bot_token = bot_token
+    def __init__(self, token: str):
+        self._token = token
 
     async def verify_data(self, auth_data: str) -> int:
         try:
@@ -84,7 +84,7 @@ class MaxAuthRepository(IMaxAuthRepository):
             # 5. Создаем secret_key
             secret_key = hmac.new(
                 key=b"WebAppData",
-                msg=self._bot_token.encode('utf-8'),
+                msg=self._token.encode('utf-8'),
                 digestmod=hashlib.sha256
             ).digest()
 
