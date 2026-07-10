@@ -208,7 +208,7 @@ class PetitionRepository(IPetitionRepository):
         return Petition(
             id=orm.id, title=orm.title, description=orm.description, region=orm.region,
             scope=orm.scope, image_url=orm.image_url, author_id=orm.author_id,
-            author_source=orm.author_source.value, author_name=orm.author_name,
+            author_source=orm.author_source, author_name=orm.author_name,
             support_count=orm.support_count, share_count=orm.share_count,
             view_count=orm.view_count, status=orm.status, candidate_id=orm.candidate_id,
             candidate_name=orm.candidate_name, candidate_progress=orm.candidate_progress,
