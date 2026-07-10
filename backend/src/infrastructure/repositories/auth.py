@@ -117,34 +117,42 @@ class VKAuthRepository(IVKAuthRepository):
 
     async def verify_data(self, auth_data: str) -> int:
         try:
-            # 1. Парсим query-строку параметров запуска VK
-            params = dict(parse_qsl(auth_data, keep_blank_values=True))
+            # 1. Разделяем строку по '&' напрямую, чтобы избежать скрытого передекодирования
+            # и сохранить оригинальный вид параметров, как их прислал VK
+            raw_pairs = auth_data.split('&')
 
-            # 2. Извлекаем подпись (sign)
-            sign_param = params.get('sign')
-            user_id = params.get('vk_user_id')  # В VK используется vk_user_id вместо user_id
+            params = {}
+            sign_param = None
 
-            if not sign_param or not user_id:
+            for pair in raw_pairs:
+                if '=' not in pair:
+                    continue
+                k, v = pair.split('=', 1)
+                if k == 'sign':
+                    sign_param = v
+                elif k.startswith('vk_'):
+                    params[k] = v
+
+            vk_user_id = params.get('vk_user_id')
+
+            if not sign_param or not vk_user_id:
                 raise AuthError("Отсутствуют обязательные параметры (sign/vk_user_id)")
 
-            # 3. Отбираем для валидации ТОЛЬКО параметры, начинающиеся с "vk_"
-            # (Это требование документации VK — посторонние query-параметры не участвуют в подписи)
-            vk_params = {k: v for k, v in params.items() if k.startswith('vk_')}
+            # 2. Сортируем ключи в алфавитном порядке
+            sorted_keys = sorted(params.keys())
 
-            # 4. Сортируем список по ключам в алфавитном порядке (ksort в PHP)
-            sorted_params = sorted(vk_params.items())
+            # 3. Собираем строку для подписи вручную через '&'
+            # Это гарантирует, что мы не сломаем регистр %-encoded символов (например %3D vs %3d)
+            sign_params_query = '&'.join(f"{k}={params[k]}" for k in sorted_keys)
 
-            # 5. Формируем строку запроса (http_build_query в PHP)
-            sign_params_query = urlencode(sorted_params)
-
-            # 6. Вычисляем HMAC-SHA256 подпись
+            # 4. Вычисляем HMAC-SHA256 подпись
             raw_hash = hmac.new(
                 key=self._client_secret.encode('utf-8'),
                 msg=sign_params_query.encode('utf-8'),
                 digestmod=hashlib.sha256
             ).digest()
 
-            # 7. Кодируем в base64url формат (замена +/ на -_ и удаление паддинга = в конце)
+            # 5. Кодируем в base64url формат
             calculated_sign = (
                 base64.b64encode(raw_hash)
                 .decode('utf-8')
@@ -153,11 +161,11 @@ class VKAuthRepository(IVKAuthRepository):
                 .rstrip('=')
             )
 
-            # 8. Проверяем валидность подписи
+            # 6. Проверяем валидность подписи
             if not hmac.compare_digest(calculated_sign, sign_param):
                 raise AuthError("Неверная подпись данных VK")
 
-            return int(user_id)
+            return int(vk_user_id)
 
         except AuthError:
             raise
