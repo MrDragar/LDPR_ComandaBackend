@@ -25,7 +25,7 @@ class AdminPetitionService(IAdminPetitionService):
             await self.__petition_repo.update_status(petition_id, PetitionStatus.PUBLISHED)
             await self.__notify_src.notify_user(
                 petition.author_id, petition.author_source,
-                text=f"Ваша петиция «{petition}» прошла модерацию и была опубликована!"
+                text=f"Ваша петиция «{petition.title}» прошла модерацию и была опубликована!"
             )
             return {"status": "published", "message": "Петиция одобрена и опубликована"}
 
