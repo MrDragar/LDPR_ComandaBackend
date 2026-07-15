@@ -228,7 +228,7 @@ class IHeadlinerService(ABC):
 class INotificationService(ABC):
     @abstractmethod
     async def notify_user(self, user_id: int, source: Sources, text: str) -> None: ...
-
+    async def send_menu(self, chat_id: int, source: Sources) -> None: ...
 
 
 class ILearningService(ABC):

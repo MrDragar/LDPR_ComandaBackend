@@ -4,21 +4,27 @@ from datetime import datetime
 from src.domain.entities.user import User, Sources
 from src.domain.exceptions import AuthError, AuthBadUserError, UserNotFoundError, \
     UserAlreadyExistsError
-from src.domain.interfaces import IUserRepository, IJWTRepository, ITelegramAuthRepository, IVKAuthRepository, IMaxAuthRepository, IUnitOfWork
-from src.services.interfaces import IAuthService
+from src.domain.interfaces import IUserRepository, IJWTRepository, ITelegramAuthRepository, \
+    IVKAuthRepository, IMaxAuthRepository, IUnitOfWork
+from src.services.interfaces import IAuthService, INotificationService
 
 logger = logging.getLogger(__name__)
+
 
 class AuthService(IAuthService):
     def __init__(self, user_repo: IUserRepository, jwt_repo: IJWTRepository,
                  tg_auth_repo: ITelegramAuthRepository, vk_auth_repo: IVKAuthRepository,
-                 max_auth_repo: IMaxAuthRepository, uow: IUnitOfWork):
+                 max_auth_repo: IMaxAuthRepository, uow: IUnitOfWork,
+                 notification_service: INotificationService, group_link: str, log_chat: int):
         self.__user_repo = user_repo
         self.__jwt_repo = jwt_repo
         self.__tg_auth_repo = tg_auth_repo
         self.__vk_auth_repo = vk_auth_repo
         self.__max_auth_repo = max_auth_repo
         self.__uow = uow
+        self.__notification_service = notification_service
+        self.group_link = group_link
+        self.log_chat = log_chat
 
     async def authenticate_tg(self, auth_data: str) -> str:
         user_id = await self.__tg_auth_repo.verify_data(auth_data)
@@ -108,7 +114,36 @@ class AuthService(IAuthService):
                 is_member=user_data.get("is_member")
             )
             await self.__user_repo.create_user(user)
-
+        await self.__notification_service.notify_user(
+            user.id, user.source, "Поздравляем, вы успешно зарегистрированы"
+        )
+        await self.__notification_service.notify_user(
+            user.id, user.source,
+            "Приглашай друзей и получи 10 баллов за приглашённого пользователя"
+        )
+        await self.__notification_service.notify_user(
+            user.id, user.source,
+            f"Вступайте в нашу группу, чтобы стать частью нашей "
+            f"Большой команды\n{self.group_link}"
+        )
+        await self.__notification_service.send_menu(user.id, user.source)
+        await self.__notification_service.notify_user(
+            self.log_chat, Sources.TG,
+            f"""Новый пользователь {'@' + user.username if user.username else '<нет username>'} зарегистрировался.
+Источник: Miniapp ({user.source})
+Является членом партии: {'Да' if user.is_member else 'Нет'}
+ФИО: {user.surname} {user.name} {user.patronymic}
+Пол: {user.gender}
+Дата рождения: {user.birth_date.strftime('%d.%m.%Y')}
+Почта: {user.email}
+Номер телефона: {user.phone_number}
+Регион: {user.region}
+Город: {user.city}
+Хочет вступить в партию ЛДПР: {'Да' if user.wish_to_join else 'Нет'}
+Домашний адрес: {user.home_address or 'не указан'}
+Подписка на новости: {'Есть' if user.news_subscription else 'Нет'}
+ID участника: {user.id}"""
+        )
         # 4. Генерация JWT
         return await self.__jwt_repo.create_access_token(user_id, src_enum)
 
