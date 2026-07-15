@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional
@@ -31,8 +33,18 @@ class MeResponse(BaseModel):
 
 
 class PatchMeRequest(BaseModel):
+    username: Optional[str] = None
+    surname: Optional[str] = None
+    name: Optional[str] = None
+    patronymic: Optional[str] = None
+    phone_number: Optional[str] = None
+    birth_date: Optional[date] = None
+    region: Optional[str] = None
+    email: Optional[str] = None
+    gender: Optional[str] = None
     city: Optional[str] = None
     wish_to_join: Optional[bool] = None
+    home_address: Optional[str] = None
     news_subscription: Optional[bool] = None
 
 
