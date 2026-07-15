@@ -210,7 +210,7 @@ class Container(DeclarativeContainer):
     auth_service: providers.Factory[IAuthService] = providers.Factory(
         AuthService, user_repo=user_repository, jwt_repo=jwt_repository,
         tg_auth_repo=tg_auth_repository, vk_auth_repo=vk_auth_repository,
-        max_auth_repo=max_auth_repository, uow=uow
+        max_auth_repo=max_auth_repository, uow=uow, group_link=config.GROUP_LINK, log_chat=config.log_chat
     )
     petition_service: providers.Factory[IPetitionService] = providers.Factory(
         PetitionService, petition_repo=petition_repository, user_repo=user_repository, uow=uow
